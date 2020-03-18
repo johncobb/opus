@@ -18,7 +18,7 @@ Example: Task 2/Pancakes
 5: Cook to golden brown
 6: Serve
 
-Now let's aassume we were taskked to create a system for managing  chefs in a restaurant. The restaurant manager would like to send the tasks to each chef and monitor the progress as each step of the preparatin process is completed. Simple you say, yeah, I agree, a few tables in a database and we have the start of a  workflow tracking system.
+Now let's aassume we were tasked to create a system for managing  chefs in a restaurant. The restaurant manager would like to send the tasks to each chef and monitor the progress as each step of the preparatin process is completed. Simple you say, yeah, I agree, a few tables in a database and we have the start of a  workflow tracking system.
 
 ## Conventional Wisdom
 Conventional wisdom says create relational tables to represent the flow.
