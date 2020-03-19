@@ -56,11 +56,34 @@ void setmask(uint16_t task, uint16_t mask, uint16_t *data) {
 }
 
 /*
- * range calculation used to query the traditional database for a range of values
- * since we are bit encoding the sub tasks we need to get back to the base task id 
- * so that we can calculate the previous and next task ids. this gives us a range to search
- * in the databse as opposed to forcing full row scans using bitwise operations. a simple api can
+ * range calculation generates integers for use in querying a RDBMS database.
+ * since we are bit encoding the task/sub-tasks we need to get back to the root task id so that
+ * we can generate a range of values from which to find a specific task. we don't look for a task id 
+ * we look for the task that falls between the previous and next. this helps prevent
+ * row scans that might occur when using bitwise operations in sql queries.  a simple api can
  * be built so that the web/api developers are insulated from the complexity of the bit manipulation.
+ */
+
+/*
+ * 0000 0001 0000 0001 = 0x101
+ * 0000 0010 0000 0001 = 0x201
+ * 0000 0011 0000 0001 = 0x301
+ * 
+ * Let's say we want to find record represented in example 0x201 we start by masking the low order bits
+ * to generate the value:
+ * 000 0010 0000 0000 = 0x200 = 512
+ * this generates the root task id
+  * subtracting max tasks (256) to the task id gives us the prev task id
+ * 000 0001 0000 0000 = 0x100 = 256
+ * adding max tasks (256) to the task id gives us the next task id
+ * 000 0011 0000 0000 = 0x300 = 768
+ * 
+ * we now have a range of values we can query the RDBMS table from
+ * 
+ * SELECT TaskId, TaskName, Epoch FROM TaskJournal WHERE TaskId BEWTWEN 256 AND 768
+ * 
+ * This calculation can be further refined to maks out the sub-task range of values further narrowing
+ * our range of values to search.
  */
 void calculate_range(uint16_t task, uint16_t *prev, uint16_t *next) {
 	*prev = task - task_max;
