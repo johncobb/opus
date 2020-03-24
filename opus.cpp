@@ -3,9 +3,12 @@
 
 using namespace std;
 
+
 uint16_t task_max = 256;
 uint16_t byte_one = 0xff;
 uint16_t byte_two = 0xff00;
+
+
 
 /*
  * after masking the 8 low order bits
@@ -36,8 +39,8 @@ int main() {
 	uint16_t task_prev; /* task_base less task_max */
 	uint16_t task_next; /* task_base plus task_max */
 
-	cout << "Welcome to opus..." << endl;
 
+	cout << "Welcome to opus..." << endl;
 	get_taskid(task, &task_base);
 	task_id = task_base/task_max;
 	cout << "task: " << task << " task_base: " << task_base << " task_id: " << task_id << endl;
@@ -73,9 +76,9 @@ void setmask(uint16_t task, uint16_t mask, uint16_t *data) {
  * to generate the value:
  * 000 0010 0000 0000 = 0x200 = 512
  * this generates the root task id
-  * subtracting max tasks (256) to the task id gives us the prev task id
+ * decrementing by one task gives us the prev task id
  * 000 0001 0000 0000 = 0x100 = 256
- * adding max tasks (256) to the task id gives us the next task id
+ * incrementing by one task gives us the next task id
  * 000 0011 0000 0000 = 0x300 = 768
  * 
  * we now have a range of values we can query the RDBMS table from
