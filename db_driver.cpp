@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include "db_driver.h"
 
-using namespace std;
+// using namespace std;
 
 
-int init_db(const char * filename, sqlite3 **db) {
+int db_init(const char * filename, sqlite3 **db) {
 	return sqlite3_open(filename, db);
 }
 
@@ -20,7 +20,7 @@ static int callback(void *notused, int argc, char **argv, char ** azcolname) {
 	return 0;
 }
 
-int init_db_tables(sqlite3 *db) {
+int db_init_schema(sqlite3 *db) {
 
 	char *errmsg = 0;
 	int rc;
@@ -41,9 +41,9 @@ int init_db_tables(sqlite3 *db) {
 	rc = sqlite3_exec(db, sql, callback, 0, &errmsg);
 
 	if (rc != SQLITE_OK) {
-		cout << stderr << " SQL error: " << errmsg << endl;
+		std::cout << stderr << " SQL error: " << errmsg << std::endl;
 	} else {
-		cout << "table created successfully" << endl;
+		std::cout << "table created successfully" << std::endl;
 	}
 
 	return 0;

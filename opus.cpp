@@ -4,7 +4,7 @@
 #include <stdlib.h>
 // #include <sqlite3.h>
 #include "db_driver.h"
-using namespace std;
+// using namespace std;
 
 
 /*
@@ -56,28 +56,28 @@ int main() {
 	int rc;
 
 	// rc = sqlite3_open("test.db", &db);
-	rc = init_db("test.db", &db);
+	rc = db_init("test.db", &db);
 
 	if (rc) {
-		cout << stderr << " Cannot open database: " << sqlite3_errmsg(db) << endl;
+		std::cout << stderr << " Cannot open database: " << sqlite3_errmsg(db) << std::endl;
 		return 0;
 	} else {
-		cout << "Opened database successfully"  << endl;
+		std::cout << "Opened database successfully"  << std::endl;
 	}
 
-	init_db_tables(db);
+	db_init_schema(db);
 	// sqlite3_close(db);
 	db_close(db);
 	
 
 
 
-	cout << "Welcome to opus..." << endl;
+	std::cout << "Welcome to opus..." << std::endl;
 	get_taskid(task, &task_base);
 	task_id = task_base/task_max;
-	cout << "task: " << task << " task_base: " << task_base << " task_id: " << task_id << endl;
+	std::cout << "task: " << task << " task_base: " << task_base << " task_id: " << task_id << std::endl;
 	calculate_range(task, &task_prev, &task_next);
-	cout << "task_prev: " << task_prev << " task_next: " << task_next << endl;
+	std::cout << "task_prev: " << task_prev << " task_next: " << task_next << std::endl;
 	return 0;
 	
 }
