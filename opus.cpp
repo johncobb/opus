@@ -1,8 +1,20 @@
 #include <iostream>
 #include <cstdint>
-
+#include <stdio.h>
+#include <stdlib.h>
+// #include <sqlite3.h>
+#include "db_driver.h"
 using namespace std;
 
+
+/*
+ * compiling: 
+ * g++ opus.cpp -o runme
+ * 
+ * compiling with sqlite3:
+ * 
+ * g++ opus.cpp db_driver.cpp -I. -l sqlite3 -o runme
+ */
 
 uint16_t task_max = 256;
 uint16_t byte_one = 0xff;
@@ -31,13 +43,33 @@ void setmask(uint16_t task, uint16_t mask, uint16_t *data);
 void get_taskid(uint16_t task, uint16_t *task_id);
 void calculate_range(uint16_t task, uint16_t *prev, uint16_t *next);
 
+uint16_t task_base; /* extract the base message id */
+uint16_t task_id; /* friendly id which is base/max tasks */
+uint16_t task_prev; /* task_base less task_max */
+uint16_t task_next; /* task_base plus task_max */
+
+
 int main() {
+	sqlite3 *db;
 
+	char *errmsg = 0;
+	int rc;
 
-	uint16_t task_base; /* extract the base message id */
-	uint16_t task_id; /* friendly id which is base/max tasks */
-	uint16_t task_prev; /* task_base less task_max */
-	uint16_t task_next; /* task_base plus task_max */
+	// rc = sqlite3_open("test.db", &db);
+	rc = init_db("test.db", &db);
+
+	if (rc) {
+		cout << stderr << " Cannot open database: " << sqlite3_errmsg(db) << endl;
+		return 0;
+	} else {
+		cout << "Opened database successfully"  << endl;
+	}
+
+	init_db_tables(db);
+	// sqlite3_close(db);
+	db_close(db);
+	
+
 
 
 	cout << "Welcome to opus..." << endl;
