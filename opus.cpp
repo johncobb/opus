@@ -57,6 +57,8 @@ uint16_t task_next; /* task_base plus task_max */
  * local prototype methods (for now)
  */
 void add_task_meta(sqlite3 *db, uint16_t task, uint8_t subtasks);
+void add_task_journal(sqlite3 *db, uint16_t task, uint16_t epoch);
+
 int run_example_query(sqlite3 *db);
 
 const char* db_name = "data.db";
@@ -112,6 +114,7 @@ int main() {
 	 */
 	for (int i=0; i<4; i++) {
 		set_bit(&task_genesis, i);
+		add_task_journal(db, task_genesis, i);
 	}
 
 
@@ -131,6 +134,14 @@ int main() {
 void add_task_meta(sqlite3 *db, uint16_t task, uint8_t subtask) {
 	char sql_buffer[512] = {0};
 	sprintf(sql_buffer, "INSERT INTO TaskMeta VALUES(%d, %d, 'Task %d');", task, subtask, task);
+
+	db_run_query(db, sql_buffer);
+
+}
+
+void add_task_journal(sqlite3 *db, uint16_t task, uint16_t epoch) {
+	char sql_buffer[512] = {0};
+	sprintf(sql_buffer, "INSERT INTO TaskJournal VALUES(%d, %d);", task, epoch);
 
 	db_run_query(db, sql_buffer);
 
