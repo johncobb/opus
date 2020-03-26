@@ -38,8 +38,13 @@ uint16_t byte_two = 0xff00;
 // uint16_t task = 0x201;
 uint16_t task = 0x301;
 
+uint16_t task_genesis = 0x00; /* starting at task 0 */
+// uint16_t task_genesis = 0x100; /* starting at task 1 */
+// uint16_t task_genesis = 0x200; /* starting at task 2 */
+
 
 void setmask(uint16_t task, uint16_t mask, uint16_t *data);
+void set_bit(uint16_t *task, int position);
 void get_taskid(uint16_t task, uint16_t *task_id);
 void calculate_range(uint16_t task, uint16_t *prev, uint16_t *next);
 
@@ -48,6 +53,24 @@ uint16_t task_id; /* friendly id which is base/max tasks */
 uint16_t task_prev; /* task_base less task_max */
 uint16_t task_next; /* task_base plus task_max */
 
+/*
+ * local prototype methods (for now)
+ */
+void add_task_meta(sqlite3 *db, uint16_t task, uint8_t subtasks);
+int run_example_query(sqlite3 *db);
+
+const char* db_name = "data.db";
+
+int run_example_query(sqlite3 *db) {
+	const char *sql;
+
+	sql = "INSERT INTO TaskMeta VALUES(256, 4, 'Task 1');" \
+		  "INSERT INTO TaskMeta VALUES(512, 4, 'Task 2');" \
+		  "INSERT INTO TaskMeta VALUES(768, 4, 'Task 3');" \
+		  "INSERT INTO TaskMeta VALUES(1024, 4 'Task 4');";
+	return db_run_query(db, sql);
+}
+
 
 int main() {
 	sqlite3 *db;
@@ -55,8 +78,7 @@ int main() {
 	char *errmsg = 0;
 	int rc;
 
-	// rc = sqlite3_open("test.db", &db);
-	rc = db_init("test.db", &db);
+	rc = db_init(db_name, &db);
 
 	if (rc) {
 		std::cout << stderr << " Cannot open database: " << sqlite3_errmsg(db) << std::endl;
@@ -65,12 +87,36 @@ int main() {
 		std::cout << "Opened database successfully"  << std::endl;
 	}
 
-	db_init_schema(db);
-	// sqlite3_close(db);
+	db_init_schema(db_name, db);
+	const char *sql;
+
+	/* add four task definitions to task meta */
+	for (int i=0; i<4; i++) {
+		std::cout << "adding task" << std::endl;
+		add_task_meta(db, i*task_max, 4);
+	}
+	/* 
+	 * the following loop will turn the first for bits
+	 * of the task on sequentially. at the end of the loop
+	 * all four bits are turned on. 
+	 * note: there may be uses cases
+	 * where the sub-task bits can be turned on out of order.
+	 * such sub-tasks would be defined as parallel in nature.
+	 * 
+	 * the output below assumes task_genesis set to zero
+	 * exampe output values for task_genesis:
+	 * task_genesis: 1
+	 * task_genesis: 3
+	 * task_genesis: 7
+	 * task_genesis: 15
+	 */
+	for (int i=0; i<4; i++) {
+		set_bit(&task_genesis, i);
+	}
+
+
 	db_close(db);
 	
-
-
 
 	std::cout << "Welcome to opus..." << std::endl;
 	get_taskid(task, &task_base);
@@ -82,10 +128,23 @@ int main() {
 	
 }
 
+void add_task_meta(sqlite3 *db, uint16_t task, uint8_t subtask) {
+	char sql_buffer[512] = {0};
+	sprintf(sql_buffer, "INSERT INTO TaskMeta VALUES(%d, %d, 'Task %d');", task, subtask, task);
+
+	db_run_query(db, sql_buffer);
+
+}
+
 void get_taskid(uint16_t task, uint16_t *task_id) {
 	 setmask(task, byte_two, task_id);
 }
 
+void set_bit(uint16_t *task, int position) {
+	*task |= (1 << position);
+	std::cout << "setting bit: " << position << " new value: 0x" << std::hex << *task << std::endl;
+
+}
 void setmask(uint16_t task, uint16_t mask, uint16_t *data) {
 	 *data = ((task)& mask);
 }
