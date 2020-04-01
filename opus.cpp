@@ -7,6 +7,10 @@
 // using namespace std;
 
 
+
+#define HI_NIBBLE(b) (((b) >> 4) & 0x0F)
+#define LO_NIBBLE(b) ((b) & 0x0F)
+
 /*
  * compiling: 
  * g++ opus.cpp -o runme
@@ -73,8 +77,16 @@ int run_example_query(sqlite3 *db) {
 	return db_run_query(db, sql);
 }
 
+void log_nibble(uint16_t data) {
+	std::cout << "hi_nibble: " << " new value: 0x" << std::hex << HI_NIBBLE(data) << std::endl;
+	std::cout << "lo_nibble: " << " new value: 0x" << std::hex << LO_NIBBLE(data) << std::endl;
+}
 
 int main() {
+
+	log_nibble(0x111);
+	return 0;
+
 	sqlite3 *db;
 
 	char *errmsg = 0;

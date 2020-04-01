@@ -1,0 +1,2 @@
+. ~/dev/emsdk/emsdk activate latest
+source . ~/dev/emsdk/emsdk_env.sh
