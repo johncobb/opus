@@ -106,6 +106,7 @@ int run_example_query(sqlite3 *db) {
 }
 
 void log_nibble(uint16_t data) {
+	std::cout << "log_mask:" << std::endl;
 	std::cout << "hi_nibble: " << " new value: 0x" << std::hex << HI_NIBBLE(data) << std::endl;
 	std::cout << "lo_nibble: " << " new value: 0x" << std::hex << LO_NIBBLE(data) << std::endl;
 }
@@ -117,23 +118,24 @@ void log_nibble(uint16_t data) {
  * data: 0x200 shift: 0x8 value: 0x2
  */
 void log_shift(uint16_t data, uint16_t shift) {
+	std::cout << "log_shift:" << std::endl;
 	std::cout << "data: 0x" << std::hex << data << " shift: 0x" << std::hex << shift << " value: 0x" << std::hex << (data >> shift) << std::endl;
 }
 
 void log_mask(uint16_t data, uint16_t mask) {
 	uint16_t value;
 	setmask(data, mask, &value);
-
+	std::cout << "log_mask:" << std::endl;
 	std::cout << "data: 0x" << std::hex << data << " mask: 0x" << std::hex << mask << " value: 0x" << std::hex << value << std::endl;
 }
 
 int main() {
-
-	log_mask(0x100, byte_one);
-	return 0;
+	
+	log_mask(0x111, byte_one);
+	// return 0;
 
 	log_nibble(0x111);
-	return 0;
+	// return 0;
 
 	log_shift(task_max, 0x08);
 	return 0;
