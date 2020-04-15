@@ -103,51 +103,55 @@ void tree_from_string(Node* node, string data, int index, int len, int log_offse
     }
 
     // Node* root = NULL;    
+    /*
+     * develop pattern where we look at current node being NULL
+     * if 
+     */
 
-    /* set the root to ascii value of string */
-    if (index == 0) {
+    if (node == NULL) {
         node = new_node(decc(data[index]));
 
-        cout << "[" << log_offset_idx << "] rt:" << encc(node->data) << endl;
-
-        /* move to the next character and call recursion */
+        if (index == 0) {
+            cout << "[" << log_offset_idx << "] root:" << encc(node->data) << endl;
+        } else {
+            cout << "[" << log_offset_idx << "] lf:" << encc(node->data) << endl;
+        }
         index++;
         log_offset_idx++;
+        
         tree_from_string(node, data, index, len, log_offset_idx);
-       
     } else {
+        char buffer = decc(data[index]);
 
-        /*
-         * if current character is less than next
-         * assign left node leaf to current
-         * assign right node leaf to the next
-         */
+        /* get the char value of the node data */
+        // char node_data = encc(node->data);
 
-        char current = decc(data[index]);
-        char next = decc(data[index+1]);
-
-        if (current < next) {
-
-            node->left = new_node(current);
-            node->right = new_node(next);
-
-            // cout << " [" << log_offset_idx << "] lr:" << encc(node->left->data) << ":" << encc(node->right->data);
-        }  else {
-
-
-            node->right = new_node(current);
-            node->left = new_node(next);
-
-            // cout << " [" << log_offset_idx << "] rl:" << encc(node->left->data ) << ":" << encc(node->right->data);
+        if (buffer > node->data) {
+            node->right = new_node(buffer);
+            cout << "[" << log_offset_idx << "] lf-rt:" << encc(node->right->data) << endl;
+            index++;
+            log_offset_idx++;
+            tree_from_string(node->left, data, index, len, log_offset_idx);
+        } else {
+            node->left = new_node(buffer);
+            cout << "[" << log_offset_idx << "] lf-lt:" << encc(node->left->data) << endl;
+            index++;
+            log_offset_idx++;
+            tree_from_string(node->right, data, index, len, log_offset_idx);     
         }
-        cout << "[" << log_offset_idx << "] rl:" << encc(node->left->data ) << ":" << encc(node->right->data) << endl;
-
-        // index++;
-        log_offset_idx++;
-        index +=2;
-        tree_from_string(node, data, index, len, log_offset_idx);
+        
     }
+
+    return;
+
 }
+
+/*
+ * JTH
+ *        J
+ *       / \
+ *      H   T
+ */
 
 int main() {
 
@@ -162,8 +166,8 @@ int main() {
 
     cout << "JTHKD5BH0D2170007" << endl;
     tree_from_string(root_1, "JTHKD5BH0D2170007", 0, 17, 0);
-    cout << "JTHKD5BH0D2170008" << endl;
-    tree_from_string(root_2, "JTHKD5BH0D2170008", 0, 17, 0);
+    // cout << "JTHKD5BH0D2170008" << endl;
+    // tree_from_string(root_2, "JTHKD5BH0D2170008", 0, 17, 0);
 
 
     if (identical(root_1, root_2)) {
