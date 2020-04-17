@@ -5,18 +5,20 @@ using namespace std;
 
 struct Node {
     int data;
-    struct Node* left;
-    struct Node* right;
+    Node* left;
+    Node* right;
 };
 
 struct Node* new_node(int data) {
-    struct Node* node = (struct Node*) malloc(sizeof(struct Node));
+    Node* node = (Node*) malloc(sizeof(Node));
     node->data = data;
     node->left = NULL;
     node->right = NULL;
 
     return node;
 }
+
+
 
 /*
  * perform inorder traversal
@@ -64,8 +66,8 @@ int identical(Node* root1, Node* root2) {
  * link: https://www.geeksforgeeks.org/check-whether-the-two-binary-search-trees-are-identical-or-not/
  */
 void g4g_example() {
-    struct Node* root1 = new_node(5);
-    struct Node* root2 = new_node(5);
+    Node* root1 = new_node(5);
+    Node* root2 = new_node(5);
     root1->left = new_node(3);
     root1->right = new_node(8);
     root1->left->left = new_node(2);
@@ -92,61 +94,84 @@ char decc(int code) {
     return char(code - '0');
 }
 
+int log_offset_id = 0;
 
-/* log_offset_idx used to cleanly format log output */
-void tree_from_string(Node* node, string data, int index, int len, int log_offset_idx) {
+void pre_order(Node* x) {
+    if (x == NULL) {
+        cout << "node-data: " << encc(x->data);
+        pre_order(x->left);
+        pre_order(x->right);
+    } else {
+        cout << "node is null" << endl;
+    }
+}
+
+/* node is our reference to the node in previous pass */
+Node* tree_from_string(Node* node, Node* leaf, string data, int index, int len, int log_offset_idx) {
 
     /* check to see if we completed the string */
     if ((index+1) > len)  {
         cout << endl;
-        return;
+        cout << "returning NULL" << endl;
+        return NULL;
     }
+    
+    char buffer = decc(data[index]);
 
-    // Node* root = NULL;    
-    /*
-     * develop pattern where we look at current node being NULL
-     * if 
+    Node* root = new_node(buffer);
+
+    /* if node is NULL we are at the root level and need to handle this 
+     * special case.
      */
-
     if (node == NULL) {
-        node = new_node(decc(data[index]));
 
-        if (index == 0) {
-            cout << "[" << log_offset_idx << "] root:" << encc(node->data) << endl;
-        } else {
-            cout << "[" << log_offset_idx << "] lf:" << encc(node->data) << endl;
-        }
-        index++;
-        log_offset_idx++;
+
+        cout << "[" << log_offset_idx << "] root: " << encc(root->data) << endl;
+
+        root = tree_from_string(root, NULL, data, index + 1, len, log_offset_idx + 1);
+        log_offset_id = index;
         
-        tree_from_string(node, data, index, len, log_offset_idx);
     } else {
-        char buffer = decc(data[index]);
-
-        /* get the char value of the node data */
-        // char node_data = encc(node->data);
-
-        if (buffer > node->data) {
-            node->right = new_node(buffer);
-            cout << "[" << log_offset_idx << "] lf-rt:" << encc(node->right->data) << endl;
-            index++;
-            log_offset_idx++;
-            tree_from_string(node->left, data, index, len, log_offset_idx);
-        } else {
-            node->left = new_node(buffer);
-            cout << "[" << log_offset_idx << "] lf-lt:" << encc(node->left->data) << endl;
-            index++;
-            log_offset_idx++;
-            tree_from_string(node->right, data, index, len, log_offset_idx);     
-        }
+        /* handle the node until both sides are filled */
+        /*
+         * after first node leaf is handled we do not care about comparing
+         * the current buffer value with the leafs just move to the one
+         * that is not assigned.
+         */
         
+        /* if leaf is null we need to determine right/left branch
+         * otherwise just return the root variable b/c that's 
+         * what the subsequent  call makes.
+         */
+
+        // cout << "index: " << index << " log_offset_idx: " << log_offset_idx << endl;
+        if (leaf == NULL) {
+            // cout << "root: " << encc(node->data) << " buffer: " << encc(buffer) << endl;
+            if (buffer > node->data) {
+                node->right = root;
+                node->left = tree_from_string(node, node->right, data, index + 1, len, log_offset_idx + 1);
+                return node;
+
+            } else {
+                node->left = root;
+                node->right = tree_from_string(node, node->left, data, index + 1, len, log_offset_idx + 1);
+                return node;
+            
+            }
+
+            return node;
+            
+        } else {
+            return root;
+        }
     }
 
-    return;
-
+    return root;
 }
 
 /*
+ * JTHKD5BH0D2170008
+ * JTHKD5BH8D2169687
  * JTH
  *        J
  *       / \
@@ -161,20 +186,10 @@ int main() {
      */
 
     cout << "starting" << endl;
-    Node* root_1 = NULL;
-    Node* root_2 = NULL;
 
     cout << "JTHKD5BH0D2170007" << endl;
-    tree_from_string(root_1, "JTHKD5BH0D2170007", 0, 17, 0);
-    // cout << "JTHKD5BH0D2170008" << endl;
-    // tree_from_string(root_2, "JTHKD5BH0D2170008", 0, 17, 0);
+    Node* root_1 = tree_from_string(NULL, NULL, "JTHKD5BH0D2170007", 0, 17, 0);
 
-
-    if (identical(root_1, root_2)) {
-        cout << "both bst(s) are identical" << endl;
-    } else {
-        cout << "both bst(s) are not identical" << endl;
-    }
  
     return 0;
 
