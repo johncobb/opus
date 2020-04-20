@@ -19,32 +19,58 @@
  * 
  * g++ opus.cpp db_driver.cpp -I. -l sqlite3 -o runme
  */
+/* divide by 256 */
 
-uint16_t task_max = 256;
+// uint16_t task_max = 256;
 uint16_t byte_one = 0xff;
 uint16_t byte_two = 0xff00;
 
+uint16_t task_max = 0xFF00;
+uint16_t task_one = (task_max >> 0x08);
 
 
 /*
- * after masking the 8 low order bits
- * of the binary pattern we get the integer
- * result on the right. uncomment the 
- * uint16_t task variables below to 
- * experiment.
+ * The task id is defined by the eight
+ * high order bits. this gives us 
+ * a total number of task templates of 0xff or 255
+ * from which the task can define work.
+ * The second nibble of the lower 8 order bytes 
+ * are used to define the number of sub-tasks for a particular
+ * task id. This gives each task up to 15 subtasks which can be defined.
+ * The first nibble of the lower 8 order bytes track the completion of each
+ * of the 15 sub-tasks. Once all sub-tasks are marked complete the task
+ * is marked complete and closed out.
  * 
- * 0000 0001 0000 0001 = 0x101
- * 0000 0010 0000 0001 = 0x201
- * 0000 0011 0000 0001 = 0x301
+ * Listed below is an example of the bit order for 
+ * task-id
+ * task-id/sub-tasks
+ * task-id/sub-task/task-state
+ * 
+ * task-id
+ * 0000 0001 0000 0000 = 0x100
+ * 0000 0010 0000 0000 = 0x200
+ * 0000 0011 0000 0000 = 0x300
+ * 
+ * first three tasks with first
+ * sub-task turned on ie: only one sub-task
+ * 0000 0001 0001 0000 = 0x110
+ * 0000 0010 0001 0000 = 0x210
+ * 0000 0011 0001 0000 = 0x310
+ * 
+ * first three tasks with first
+ * sub-task turned on ie: only one sub-task
+ * each sub-task with task-complete
+ * bit flipped on
+ * 0000 0001 0001 0001 = 0x111
+ * 0000 0010 0001 0001 = 0x211
+ * 0000 0011 0001 0001 = 0x311
  */
 
-// uint16_t task = 0x101;
-// uint16_t task = 0x201;
-uint16_t task = 0x301;
+// uint16_t task = 0x100;
+// uint16_t task = 0x200;
+uint16_t task = 0x300;
 
-uint16_t task_genesis = 0x00; /* starting at task 0 */
-// uint16_t task_genesis = 0x100; /* starting at task 1 */
-// uint16_t task_genesis = 0x200; /* starting at task 2 */
+uint16_t task_genesis = 0x100; /* starting at task 0 */
 
 
 void setmask(uint16_t task, uint16_t mask, uint16_t *data);
@@ -60,6 +86,8 @@ uint16_t task_next; /* task_base plus task_max */
 /*
  * local prototype methods (for now)
  */
+uint16_t shift_eight = 0x08;
+
 void add_task_meta(sqlite3 *db, uint16_t task, uint8_t subtasks);
 void add_task_journal(sqlite3 *db, uint16_t task, uint16_t epoch);
 
@@ -78,13 +106,38 @@ int run_example_query(sqlite3 *db) {
 }
 
 void log_nibble(uint16_t data) {
+	std::cout << "log_mask:" << std::endl;
 	std::cout << "hi_nibble: " << " new value: 0x" << std::hex << HI_NIBBLE(data) << std::endl;
 	std::cout << "lo_nibble: " << " new value: 0x" << std::hex << LO_NIBBLE(data) << std::endl;
 }
 
+/*
+ * example:
+ * log_shift(0x200, 0x08);
+ * output:
+ * data: 0x200 shift: 0x8 value: 0x2
+ */
+void log_shift(uint16_t data, uint16_t shift) {
+	std::cout << "log_shift:" << std::endl;
+	std::cout << "data: 0x" << std::hex << data << " shift: 0x" << std::hex << shift << " value: 0x" << std::hex << (data >> shift) << std::endl;
+}
+
+void log_mask(uint16_t data, uint16_t mask) {
+	uint16_t value;
+	setmask(data, mask, &value);
+	std::cout << "log_mask:" << std::endl;
+	std::cout << "data: 0x" << std::hex << data << " mask: 0x" << std::hex << mask << " value: 0x" << std::hex << value << std::endl;
+}
+
 int main() {
+	
+	log_mask(0x111, byte_one);
+	// return 0;
 
 	log_nibble(0x111);
+	// return 0;
+
+	log_shift(task_max, 0x08);
 	return 0;
 
 	sqlite3 *db;

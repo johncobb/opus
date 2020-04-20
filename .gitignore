@@ -4,3 +4,9 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+
+*.pyc
+*.pyo
+env
+vin_dataset_master
+btree/vin_dataset_master
