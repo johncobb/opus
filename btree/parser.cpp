@@ -120,11 +120,31 @@ Node* tree_from_string(Node* node, Node* leaf, string data, int index, int len, 
 
     Node* root = new_node(buffer);
 
+    // cout << "buffer: " << encc(buffer) << endl;
+    if (node != NULL) {
+        cout << "node: " << encc(node->data) << endl;
+
+        if (node->right != NULL) {
+            cout << "node-right: " << encc(node->right->data) << " next: " << encc(buffer) << endl;
+        }
+            
+
+        if (node->left != NULL)
+            cout << "node-left: " << encc(node->left->data) << endl;
+
+    }
+
+    /*
+    * todo: index is never getting beyond 2 because the callstack is only
+    * incrementing to one. each stack would have to be the next seqency index
+    * through the stack.
+    * recommendation: use a stack to pop values out of the string
+    */
+
     /* if node is NULL we are at the root level and need to handle this 
      * special case.
      */
     if (node == NULL) {
-
 
         cout << "[" << log_offset_idx << "] root: " << encc(root->data) << endl;
 
@@ -132,13 +152,7 @@ Node* tree_from_string(Node* node, Node* leaf, string data, int index, int len, 
         log_offset_id = index;
         
     } else {
-        /* handle the node until both sides are filled */
-        /*
-         * after first node leaf is handled we do not care about comparing
-         * the current buffer value with the leafs just move to the one
-         * that is not assigned.
-         */
-        
+
         /* if leaf is null we need to determine right/left branch
          * otherwise just return the root variable b/c that's 
          * what the subsequent  call makes.
@@ -147,20 +161,16 @@ Node* tree_from_string(Node* node, Node* leaf, string data, int index, int len, 
         // cout << "index: " << index << " log_offset_idx: " << log_offset_idx << endl;
         if (leaf == NULL) {
             // cout << "root: " << encc(node->data) << " buffer: " << encc(buffer) << endl;
-            if (buffer > node->data) {
+            if (buffer >= node->data) {
                 node->right = root;
                 node->left = tree_from_string(node, node->right, data, index + 1, len, log_offset_idx + 1);
                 return node;
-
             } else {
                 node->left = root;
                 node->right = tree_from_string(node, node->left, data, index + 1, len, log_offset_idx + 1);
                 return node;
-            
             }
-
             return node;
-            
         } else {
             return root;
         }
