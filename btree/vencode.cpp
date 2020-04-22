@@ -1,8 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <stack>
+#include <ctime>
 
 using namespace std;
+
+clock_t clock_time;
+clock_t clock_start;
+clock_t clock_end;
 
 struct Node {
     int data;
@@ -31,19 +36,21 @@ struct NFile {
     // uint64_t vrad_gamma;
 };
 
-
+/* Record branch moving left on map */
 void nleft(uint16_t* map, int* bitPos) {
     (*bitPos)++;
 }
 
+/* Record branch moving right on map */
 void nright(uint16_t* map, int* bitPos) {
     *map |= (1 << (*bitPos));
     (*bitPos)++;
 }
+
+/* Determine direction taken for specific node */
 bool ncheck(int32_t data, int bitPos) {
     return ((data) & (1<<(bitPos)));
 }
-
 
 int identical(Node* root1, Node* root2) {
     
@@ -105,10 +112,6 @@ char decc(int code) {
     return char(code - '0');
 }
 
-int log_offset_id = 0;
-
-
-
 /* perform inorder traversal */
 void inorder(Node* root) {
 
@@ -144,11 +147,12 @@ Node* build_tree(stack<int> *data) {
     return root;
 }
 
-/* map is used to determine order tree took to build the record
- * since we have a determinant lenght of  the record we're encoding
+/* 
+ * Map is used to determine branch direction to build the record.
+ * Since we have a determinant lenght of the record we're encoding
  * we can store the left and right node branches in an integer.
- * this will help high level analysis of records without decoding the 
- * entire tree when performing comparisons
+ * This will help high level analysis of records without decoding the 
+ * entire tree when performing comparisons. Possible branch prediction.
  */
 void run_example_map() {
     uint16_t map = 0;
@@ -185,7 +189,6 @@ void run_example() {
      */
 
     NFile nf;
-
 
     string vdata1 = "JTHKD5BH0D2170008";
     string vdata2 = "JTHKD5BH8D2169687";
@@ -227,15 +230,14 @@ void run_example() {
  *       / \
  *      H   T
  */
-
 int main() {
 
     // run_example();
     // run_example_buildtree();
-    run_example_map();
-    return 0;
+    // run_example_map();
+    // return 0;
     
-
+    clock_start = clock();
 
     fstream fio;
     string line;
@@ -243,21 +245,33 @@ int main() {
     fio.open("output");
     fio.seekg(0, ios::beg);
     cout << "start of file" << endl;
-    uint8_t counter = 0;
+    uint32_t counter = 0;
     size_t len = 0;
 
+    stack<Node*> vdata;
+    
     while(fio) {
-        if (counter++ > 10) {
-            break;
-        }
-        
+        counter++;
+
         getline(fio, line);
+
+        // stack<int> buffer1;
+        // load_stack(&buffer1, line);
+        // Node* root1 = build_tree(&buffer1);
+        // vdata.push(root1);
         len = line.length();
 
-        cout << line << " " << len << endl;
+        // cout << line << " " << len << endl;
     }
 
+    cout << "stack depth: " << vdata.size() << endl;
+
     fio.close();
-    cout << "end of file" << endl;
+    clock_end = clock();
+
+double time_taken = double(clock_end - clock_start) / double(CLOCKS_PER_SEC); 
+    cout << "total duration : " << fixed  
+    << time_taken << setprecision(5); 
+    cout << " sec " << endl; 
 
 }
