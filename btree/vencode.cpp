@@ -129,6 +129,8 @@ void load_stack(stack<int> *buffer, string data) {
     }    
 }
 
+
+
 Node* build_tree(stack<int> *data) {
 
     if (data->empty()) {
@@ -142,6 +144,76 @@ Node* build_tree(stack<int> *data) {
     root->left = build_tree(data);
     // cout << "left: " << endl;
     root->right = build_tree(data);
+    // cout << "right: " << endl;
+    
+    return root;
+}
+
+/*
+ * This example shows the algorithm ability to flag a specific element 
+ * from the tree. Example: flag the i(th) element in the tree while
+ * encoding. Allowing the algorithm to start processing anywhere in the tree
+ * we set a flag. (start i(th) position and work forward)
+ */
+// volatile int flag_counter = 0;
+Node* build_tree_flag(stack<int> *data, int flag, Node** ptr_flag) {
+
+    static int flag_counter = 0; /* static to preserve value */
+
+    if (data->empty()) {
+        return NULL;
+    }
+
+    Node* root = new_node(decc(data->top()));
+    flag_counter++;
+    
+    if (flag_counter == flag) {
+        cout << "flag: " << flag << " flag_counter: " << flag_counter << " data: " << encc(root->data) << endl;
+        (*ptr_flag) = root;
+    }
+    
+    data->pop();
+    
+    root->left = build_tree_flag(data, flag, ptr_flag);
+    // cout << "left: " << endl;
+    root->right = build_tree_flag(data, flag, ptr_flag);
+    // cout << "right: " << endl;
+    
+    return root;
+}
+
+struct Flag {
+    int index;
+    Node* node;
+};
+
+Node* build_tree_flagx(stack<int> *data, stack<Flag> *flag) {
+
+    static int flag_counter = 0; /* static to preserve value */
+    
+    if (data->empty()) {
+        return NULL;
+    }
+
+    Node* root = new_node(decc(data->top()));
+    flag_counter++;
+    
+    if (flag != NULL) {
+        if (flag->empty() == false) {
+            if (flag->top().index == flag_counter) {
+                cout << "flag: " << flag->top().index << " flag_counter: " << flag_counter << " data: " << encc(root->data) << endl;
+                flag->top().node = root;      
+                flag->pop();      
+            }
+        }
+    }
+
+    
+    data->pop();
+    
+    root->left = build_tree_flagx(data, flag);
+    // cout << "left: " << endl;
+    root->right = build_tree_flagx(data, flag);
     // cout << "right: " << endl;
     
     return root;
@@ -181,6 +253,46 @@ void run_example_buildtree() {
     inorder(root1);
 }
 
+void run_example_buildtree_flag() {
+
+    Node* flag = NULL;
+    string vdata1 = "JTHKD5BH0D2170008";
+    stack<int> buffer1;
+    load_stack(&buffer1, vdata1);
+    Node* root1 = build_tree_flag(&buffer1, 8, &flag);
+    inorder(root1);
+
+    if (flag != NULL)
+        cout << "flag: " << encc(flag->data) << endl;
+}
+
+void run_example_buildtree_flagx() {
+
+    Node* flag = NULL;
+    string vdata1 = "JTHKD5BH0D2170008";
+    stack<int> buffer1;
+    load_stack(&buffer1, vdata1);
+    
+
+    // Node* root1 = build_tree_flag(&buffer1, 8, &flag);
+    
+
+    stack<Flag> flags;
+    Flag flag1 = {8, NULL};
+    Flag flag2 = {6, NULL};
+    
+    flags.push(flag1);
+    flags.push(flag2);
+    Node* root1 = build_tree_flagx(&buffer1, &flags);
+
+
+
+
+    inorder(root1);
+
+    if (flag != NULL)
+        cout << "flag: " << encc(flag->data) << endl;
+}
 void run_example() {
 
     /*
@@ -235,7 +347,9 @@ int main() {
     // run_example();
     // run_example_buildtree();
     // run_example_map();
-    // return 0;
+    // run_example_buildtree_flag();
+    run_example_buildtree_flagx();
+    return 0;
     
     clock_start = clock();
 
