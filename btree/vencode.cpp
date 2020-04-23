@@ -24,6 +24,18 @@ struct Node* new_node(int data) {
     return node;
 }
 
+struct FlagResult {
+    int token;
+    Node* node;
+};
+
+struct Flag {
+    stack<int> tokens;
+    stack<Node*> nodes;
+    stack<FlagResult> results;
+
+};
+
 struct NFile {
     stack<Node*> vdata;
     Node* data;
@@ -129,8 +141,6 @@ void load_stack(stack<int> *buffer, string data) {
     }    
 }
 
-
-
 Node* build_tree(stack<int> *data) {
 
     if (data->empty()) {
@@ -182,13 +192,10 @@ Node* build_tree_flag(stack<int> *data, int flag, Node** ptr_flag) {
     return root;
 }
 
-struct Flag {
-    int index;
-    Node* node;
-};
 
-Node* build_tree_flagx(stack<int> *data, stack<Flag> *flag) {
 
+Node* build_tree_flagx(stack<int> *data, Flag *flag) {
+    /* used to track nodes of tree */
     static int flag_counter = 0; /* static to preserve value */
     
     if (data->empty()) {
@@ -196,21 +203,27 @@ Node* build_tree_flagx(stack<int> *data, stack<Flag> *flag) {
     }
 
     Node* root = new_node(decc(data->top()));
+
     flag_counter++;
     
     if (flag != NULL) {
-        if (flag->empty() == false) {
-            if (flag->top().index == flag_counter) {
-                cout << "flag: " << flag->top().index << " flag_counter: " << flag_counter << " data: " << encc(root->data) << endl;
-                flag->top().node = root;      
-                flag->pop();      
+        if (flag->tokens.empty() == false) {
+            if (flag->tokens.top() == flag_counter) {
+                // cout << "flag: " << flag->tokens.top() << " flag_counter: " << flag_counter << " data: " << encc(root->data) << endl;
+                /* store the token and node in the result */
+                FlagResult fr = {flag->tokens.top(), root};
+
+                /* queue the FlagResult into the results stack */
+                flag->results.push(fr);
+
+                /* move to next token in stack */
+                flag->tokens.pop();      
             }
         }
     }
 
-    
+    /* move to next character in stack */
     data->pop();
-    
     root->left = build_tree_flagx(data, flag);
     // cout << "left: " << endl;
     root->right = build_tree_flagx(data, flag);
@@ -268,31 +281,44 @@ void run_example_buildtree_flag() {
 
 void run_example_buildtree_flagx() {
 
-    Node* flag = NULL;
+    // Node* flag = NULL;
     string vdata1 = "JTHKD5BH0D2170008";
     stack<int> buffer1;
     load_stack(&buffer1, vdata1);
+
+    /* used to designate which index values we are
+     * interested in flagging.
+     */
+    int vdata_index1 = 8;
+    int vdata_index2 = 6;
+
+    /*
+     * Setup the flags. Currently the order of the flags matter
+     * due to the nature of the stack. Explore vector or some other
+     * option that would allow ordinal dequeueing.
+     */
+
+    Flag flag;
+
+    flag.tokens.push(vdata_index1);
+    flag.tokens.push(vdata_index2);
+
     
-
-    // Node* root1 = build_tree_flag(&buffer1, 8, &flag);
-    
-
-    stack<Flag> flags;
-    Flag flag1 = {8, NULL};
-    Flag flag2 = {6, NULL};
-    
-    flags.push(flag1);
-    flags.push(flag2);
-    Node* root1 = build_tree_flagx(&buffer1, &flags);
-
-
-
-
+    Node* root1 = build_tree_flagx(&buffer1, &flag);
     inorder(root1);
 
-    if (flag != NULL)
-        cout << "flag: " << encc(flag->data) << endl;
+    while(flag.results.empty() == false) {
+
+        FlagResult result = flag.results.top();
+        Node* node = result.node;
+
+        cout << "node[:" << result.token << "] data: " << encc(node->data) << endl;
+        flag.results.pop();
+    }
+
+    cout << endl;
 }
+
 void run_example() {
 
     /*
