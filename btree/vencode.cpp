@@ -297,16 +297,17 @@ void run_example_buildtree_flagx() {
      * due to the nature of the stack. Explore vector or some other
      * option that would allow ordinal dequeueing.
      */
-
     Flag flag;
 
     flag.tokens.push(vdata_index1);
     flag.tokens.push(vdata_index2);
 
-    
+    /* build the btree */
     Node* root1 = build_tree_flagx(&buffer1, &flag);
+    /* log the order */
     inorder(root1);
 
+    /* process the results */
     while(flag.results.empty() == false) {
 
         FlagResult result = flag.results.top();
