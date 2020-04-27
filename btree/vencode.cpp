@@ -2,6 +2,7 @@
 #include <fstream>
 #include <stack>
 #include <ctime>
+#include <map>
 
 using namespace std;
 
@@ -23,6 +24,10 @@ struct Node* new_node(int data) {
 
     return node;
 }
+
+struct FlagKey {
+    std::map<int, Node*> flags;
+};
 
 struct FlagResult {
     int token;
@@ -115,7 +120,7 @@ void g4g_example() {
     }
 }
 
-string map = "0123456780ABCDEFGHJKLMNPRSTUVWXYZ";
+// string map = "0123456780ABCDEFGHJKLMNPRSTUVWXYZ";
 
 char encc(int code) {
     return char(code + '0');
@@ -194,7 +199,45 @@ Node* build_tree_flag(stack<int> *data, int flag, Node** ptr_flag) {
 
 
 
-Node* build_tree_flagx(stack<int> *data, Flag *flag) {
+// Node* build_tree_flagx(stack<int> *data, Flag *flag) {
+//     /* used to track nodes of tree */
+//     static int flag_counter = 0; /* static to preserve value */
+    
+//     if (data->empty()) {
+//         return NULL;
+//     }
+
+//     Node* root = new_node(decc(data->top()));
+
+//     flag_counter++;
+    
+//     if (flag != NULL) {
+//         if (flag->tokens.empty() == false) {
+//             if (flag->tokens.top() == flag_counter) {
+//                 // cout << "flag: " << flag->tokens.top() << " flag_counter: " << flag_counter << " data: " << encc(root->data) << endl;
+//                 /* store the token and node in the result */
+//                 FlagResult fr = {flag->tokens.top(), root};
+
+//                 /* queue the FlagResult into the results stack */
+//                 flag->results.push(fr);
+
+//                 /* move to next token in stack */
+//                 flag->tokens.pop();      
+//             }
+//         }
+//     }
+
+//     /* move to next character in stack */
+//     data->pop();
+//     root->left = build_tree_flagx(data, flag);
+//     // cout << "left: " << endl;
+//     root->right = build_tree_flagx(data, flag);
+//     // cout << "right: " << endl;
+    
+//     return root;
+// }
+
+Node* build_tree_flagx(stack<int> *data, Flag *flag, FlagKey *fkey) {
     /* used to track nodes of tree */
     static int flag_counter = 0; /* static to preserve value */
     
@@ -206,6 +249,16 @@ Node* build_tree_flagx(stack<int> *data, Flag *flag) {
 
     flag_counter++;
     
+    if (fkey != NULL) {
+        /* check to see if we have a flag for this node level */
+        map<int, Node*>::iterator itr = fkey->flags.find(flag_counter);
+        
+        if (itr != fkey->flags.end()) {
+            /* store the node */
+            fkey->flags[flag_counter] = root;
+        }
+    }
+
     if (flag != NULL) {
         if (flag->tokens.empty() == false) {
             if (flag->tokens.top() == flag_counter) {
@@ -224,9 +277,9 @@ Node* build_tree_flagx(stack<int> *data, Flag *flag) {
 
     /* move to next character in stack */
     data->pop();
-    root->left = build_tree_flagx(data, flag);
+    root->left = build_tree_flagx(data, flag, fkey);
     // cout << "left: " << endl;
-    root->right = build_tree_flagx(data, flag);
+    root->right = build_tree_flagx(data, flag, fkey);
     // cout << "right: " << endl;
     
     return root;
@@ -286,11 +339,19 @@ void run_example_buildtree_flagx() {
     stack<int> buffer1;
     load_stack(&buffer1, vdata1);
 
+
+
     /* used to designate which index values we are
      * interested in flagging.
      */
     int vdata_index1 = 8;
     int vdata_index2 = 6;
+
+    FlagKey fkey;
+
+    fkey.flags.insert(std::pair<int, Node*> (vdata_index1, NULL));
+    fkey.flags.insert(std::pair<int, Node*> (vdata_index2, NULL));        
+
 
     /*
      * Setup the flags. Currently the order of the flags matter
@@ -303,7 +364,7 @@ void run_example_buildtree_flagx() {
     flag.tokens.push(vdata_index2);
 
     /* build the btree */
-    Node* root1 = build_tree_flagx(&buffer1, &flag);
+    Node* root1 = build_tree_flagx(&buffer1, &flag, &fkey);
     /* log the order */
     inorder(root1);
 
@@ -316,6 +377,11 @@ void run_example_buildtree_flagx() {
         cout << "node[:" << result.token << "] data: " << encc(node->data) << endl;
         flag.results.pop();
     }
+
+    cout << "fkey-flags[6]: " << encc(fkey.flags[vdata_index1]->data) << endl;
+    inorder(fkey.flags[vdata_index1]);
+    cout << "fkey-flags[8]: " << encc(fkey.flags[vdata_index2]->data) << endl;
+    inorder(fkey.flags[vdata_index2]);
 
     cout << endl;
 }
@@ -361,6 +427,25 @@ void run_example() {
     }    
 }
 
+void run_std_map() {
+    std::map<int, Node*> mflag;
+
+    mflag[6] = new_node(decc('A'));
+    mflag[8] = new_node(decc('B'));
+    // mflag.insert(std::pair<int, Node*> (6, new_node('A')));
+    // mflag.insert(std::pair<int, Node*> (8, new_node('B')));
+
+    Node* node_key6 = mflag[6];
+    cout << "node[6]: " << encc(node_key6->data) << endl;
+    
+    Node* node_key8 = mflag[8];
+    cout << "node[8]: " << encc(node_key8->data) << endl;
+
+    Node* node_keynull = mflag[0];
+    if (node_keynull == NULL) {
+        cout << "null" << endl;
+    }
+}
 /*
  * JTHKD5BH0D2170008
  * JTHKD5BH8D2169687
@@ -370,7 +455,8 @@ void run_example() {
  *      H   T
  */
 int main() {
-
+    // run_std_map();
+    // return 0;
     // run_example();
     // run_example_buildtree();
     // run_example_map();
