@@ -28,7 +28,8 @@ char vmapcharat(int index) {
 
 void vmapencode(string src, string* dest) {
     for (int i=0; i<src.length(); i++) {
-        dest->push_back(vmapindexof(src[i]));
+        // dest->push_back(vmapindexof(src[i]));
+        dest->push_back(vmapindexof(toupper(src[i])));
     }
 }
 
@@ -48,6 +49,10 @@ uint64_t vraddec(uint64_t vrad, int base, int len);
 /* https://www.cs.colostate.edu/~cs270/.Spring12/Notes/NumberSystems */
 uint64_t vradenc(string data, int base) {
     uint64_t vrad = 0;
+    uint64_t vradshxp = 0; /* used to track bitshift exponent */
+
+    uint64_t sheval = 33;
+
     cout << "vradenc: ";
     vmapdecode(data);
     cout << " base: " << base << endl;
@@ -62,13 +67,14 @@ uint64_t vradenc(string data, int base) {
 
         // cout << "mval: " << mval << " mvalc: " << mvalc << endl;
 
-        vrad = vrad + mval * pow(base, exp); // replace: bitshif
-        // cout << "[" << mvalc << "]" << base << "^" << exp << "=" << vrad << endl;    
+        vrad += (mval * pow(base, exp)); // replace: bitshif
+        // vradshxp += (mval * (sheval <<= exp)); // todo: research
 
         cout << "[" << i << "]";
         cout << "[" << mval << "]";     
         cout << "[" << mvalc << "]";   
-        cout << base << "^" << exp << "=" << vrad << endl;         
+        cout << base << "^" << exp << "=" << vrad << endl;
+        // cout << base << "^" << exp << "=" << vrad << ":" << vradshxp << endl;   
 
     }
 
@@ -135,7 +141,6 @@ void run_example_encdec_base33(string buffer) {
 
 
 void run_example_vradenc() {
-    
 
     int base = 33;
     string buffer = "JTH";
@@ -143,6 +148,27 @@ void run_example_vradenc() {
     /* perform limited charset encoding */
     vmapencode(buffer, &data);
     vradenc(data, base);
+}
+
+/* 
+ * used to illustrate optimizing exponents using bit shifting
+ * up to 23x more efficient
+ */
+void run_example_exp() {
+    uint64_t eval = 8;
+
+    cout << eval << "^n using pow." << endl;
+    cout << eval << "^0=" << pow(eval,0) << endl;
+    cout << eval << "^1=" << pow(eval,1) << endl;
+    cout << eval << "^2=" << pow(eval,2) << endl;
+
+    cout << eval << "^n using bitshift." << endl;
+
+    uint64_t sheval = 8;
+    for (int i=0; i<3; i++) {
+        cout << eval << "^" << i << "=" << (sheval <<= i) << endl;
+    }
+
 
 }
 
@@ -168,7 +194,7 @@ void run_example_vencode() {
      * JTH
      * KD5BH0
      * D2170008
-     * */
+     */
     
     Vradix vradix = {0,0,0};
     int base = 33;
@@ -178,33 +204,32 @@ void run_example_vencode() {
 
     string buffer_x = "JTH";
     string buffer_y = "KD5BH";
-    string buffer_z = "0D2170008";
+    string buffer_z = "0d2170008";
 
     vmapencode(buffer_x, &data_x);
     vradix.wmi = vradenc(data_x, base);
 
-    vmapencode(buffer_y, &data_y);
-    vradix.vds = vradenc(data_y, base); 
+    // vmapencode(buffer_y, &data_y);
+    // vradix.vds = vradenc(data_y, base); 
 
-    vmapencode(buffer_z, &data_z);
-    vradix.ser = vradenc(data_z, base);
+    // vmapencode(buffer_z, &data_z);
+    // vradix.ser = vradenc(data_z, base);
 
     vraddec(vradix.wmi, base, data_x.length());
-    vraddec(vradix.vds, base, data_y.length());
-    vraddec(vradix.ser, base, data_z.length());
-
-
+    // vraddec(vradix.vds, base, data_y.length());
+    // vraddec(vradix.ser, base, data_z.length());
 
 }
 
 int main() {
-
+    // run_example_exp();
+    // return 0;
+    // run_example_vencode();
     // run_example_encdec_base10();
-    // run_example_encdec_base33("JTHKD5BH0");
-    // run_example_encdec_base33("JTHKD5BH0D2170008");
-    run_example_vencode();
+    // run_example_encdec_base33("HACK3D");
+    
 
-    // run_example_vradenc();
+    run_example_vradenc();
 
 
 
