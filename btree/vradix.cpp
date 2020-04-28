@@ -209,27 +209,24 @@ void run_example_vencode() {
     vmapencode(buffer_x, &data_x);
     vradix.wmi = vradenc(data_x, base);
 
-    // vmapencode(buffer_y, &data_y);
-    // vradix.vds = vradenc(data_y, base); 
+    vmapencode(buffer_y, &data_y);
+    vradix.vds = vradenc(data_y, base); 
 
-    // vmapencode(buffer_z, &data_z);
-    // vradix.ser = vradenc(data_z, base);
+    vmapencode(buffer_z, &data_z);
+    vradix.ser = vradenc(data_z, base);
 
     vraddec(vradix.wmi, base, data_x.length());
-    // vraddec(vradix.vds, base, data_y.length());
-    // vraddec(vradix.ser, base, data_z.length());
+    vraddec(vradix.vds, base, data_y.length());
+    vraddec(vradix.ser, base, data_z.length());
 
 }
 
 int main() {
     // run_example_exp();
     // return 0;
-    // run_example_vencode();
+    run_example_vencode();
     // run_example_encdec_base10();
     // run_example_encdec_base33("HACK3D");
-    
-
-    run_example_vradenc();
 
 
 
