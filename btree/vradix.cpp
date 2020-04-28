@@ -3,6 +3,12 @@
 
 using namespace std;
 
+struct Vradix{
+    uint64_t wmi;
+    uint64_t vds;
+    uint64_t ser;
+};
+
 char encc(int code) {
     return char(code + '0');
 }
@@ -10,7 +16,7 @@ char decc(int code) {
     return char(code - '0');
 }
 
-string vmap = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
+string vmap = "*0123456789ABCDEFGHJKLMNPRSTUVWXYZ";
 
 int vmapindexof(char c) {
     return vmap.find(c);
@@ -36,7 +42,10 @@ void vmapdecode(string data) {
 uint64_t vradenc(string data, int base);
 uint64_t vraddec(uint64_t vrad, int base, int len);
 
+
+
 /* http://eecs.wsu.edu/~ee314/handouts/numsys.pdf */
+/* https://www.cs.colostate.edu/~cs270/.Spring12/Notes/NumberSystems */
 uint64_t vradenc(string data, int base) {
     uint64_t vrad = 0;
     cout << "vradenc: ";
@@ -64,7 +73,7 @@ uint64_t vradenc(string data, int base) {
     }
 
     // cout << "total: " << vrad << endl;
-    vraddec(vrad, base, data.length());
+    // vraddec(vrad, base, data.length());
     return vrad;
 }
 
@@ -74,7 +83,7 @@ uint64_t vraddec(uint64_t vrad, int base, int len) {
     
     for (int i=0; i<len; i++) {
         int vmapi = 0;
-        int vdelta = 0;
+        uint64_t vdelta = 0;
         int exp = (len-1) - i;
 
         uint64_t vradp = pow(base, exp);
@@ -102,6 +111,7 @@ uint64_t vraddec(uint64_t vrad, int base, int len) {
     return vrad;
 }
 
+/* base 10 encodes sequence of numbers 0...9 */
 void run_example_encdec_base10() {
     int base = 10;
     string buffer = "843";
@@ -111,24 +121,24 @@ void run_example_encdec_base10() {
     vradenc(data, base);    
 }
 
-void run_example_encdec_base33() {
+/* base 33 can encodes sequence of alphanumeric 0...9 A...Z (excluding IOQ) */
+void run_example_encdec_base33(string buffer) {
+
     int base = 33;
-    string buffer = "JTH";
     string data;
 
     vmapencode(buffer, &data);
-    vradenc(data, base);    
+    uint64_t vrad = vradenc(data, base);
+    cout << "enc result: " << vrad << endl;
+    vraddec(vrad, base, buffer.length());
 }
-/*
- * our example decodes components of a vin
- * wmi: 0...2
- * vds: 3...7
- * ser: 7...16
- */
+
+
 void run_example_vradenc() {
+    
 
     int base = 33;
-    string buffer = "JTHKD5BH0D2170008";
+    string buffer = "JTH";
     string data;
     /* perform limited charset encoding */
     vmapencode(buffer, &data);
@@ -152,12 +162,49 @@ void run_vmap_example() {
 
 }
 
+void run_example_vencode() {
+    /* 
+     * JTHKD5BH0D2170008
+     * JTH
+     * KD5BH0
+     * D2170008
+     * */
+    
+    Vradix vradix = {0,0,0};
+    int base = 33;
+    string data_x;
+    string data_y;
+    string data_z;
+
+    string buffer_x = "JTH";
+    string buffer_y = "KD5BH";
+    string buffer_z = "0D2170008";
+
+    vmapencode(buffer_x, &data_x);
+    vradix.wmi = vradenc(data_x, base);
+
+    vmapencode(buffer_y, &data_y);
+    vradix.vds = vradenc(data_y, base); 
+
+    vmapencode(buffer_z, &data_z);
+    vradix.ser = vradenc(data_z, base);
+
+    vraddec(vradix.wmi, base, data_x.length());
+    vraddec(vradix.vds, base, data_y.length());
+    vraddec(vradix.ser, base, data_z.length());
+
+
+
+}
+
 int main() {
 
     // run_example_encdec_base10();
-    //run_example_encdec_base33();
+    // run_example_encdec_base33("JTHKD5BH0");
+    // run_example_encdec_base33("JTHKD5BH0D2170008");
+    run_example_vencode();
 
-    run_example_vradenc();
+    // run_example_vradenc();
 
 
 
