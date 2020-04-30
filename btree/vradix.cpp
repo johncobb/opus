@@ -1,5 +1,7 @@
 #include <iostream>
 #include <math.h>
+#include <map>
+#include <fstream>
 
 using namespace std;
 
@@ -44,14 +46,12 @@ uint64_t vradenc(string data, int base);
 uint64_t vraddec(uint64_t vrad, int base, int len);
 
 
-
 /* http://eecs.wsu.edu/~ee314/handouts/numsys.pdf */
 /* https://www.cs.colostate.edu/~cs270/.Spring12/Notes/NumberSystems */
 uint64_t vradenc(string data, int base) {
     uint64_t vrad = 0;
     uint64_t vradshxp = 0; /* used to track bitshift exponent */
-
-    uint64_t sheval = 33;
+    int exp = 0;
 
     cout << "vradenc: ";
     vmapdecode(data);
@@ -59,38 +59,34 @@ uint64_t vradenc(string data, int base) {
 
     for (int i=0; i<data.length(); i++) {
 
-        int exp = (data.length()-1) - i;
+        exp = (data.length()-1) - i;
 
         /* get the index of the character at i(th) position */
         int mval = data[i];
         char mvalc = vmapcharat(mval);
 
-        // cout << "mval: " << mval << " mvalc: " << mvalc << endl;
-
         vrad += (mval * pow(base, exp)); // replace: bitshif
-        // vradshxp += (mval * (sheval <<= exp)); // todo: research
 
         cout << "[" << i << "]";
         cout << "[" << mval << "]";     
         cout << "[" << mvalc << "]";   
         cout << base << "^" << exp << "=" << vrad << endl;
-        // cout << base << "^" << exp << "=" << vrad << ":" << vradshxp << endl;   
 
     }
 
-    // cout << "total: " << vrad << endl;
-    // vraddec(vrad, base, data.length());
     return vrad;
 }
 
 uint64_t vraddec(uint64_t vrad, int base, int len) {
-
+    int exp = 0;
     cout << "vraddec: " << vrad << endl;
     
     for (int i=0; i<len; i++) {
         int vmapi = 0;
         uint64_t vdelta = 0;
-        int exp = (len-1) - i;
+
+        exp = (len-1) -i;
+
 
         uint64_t vradp = pow(base, exp);
         uint64_t vmod = vrad % vradp; // replace: bitshif
@@ -168,8 +164,6 @@ void run_example_exp() {
     for (int i=0; i<3; i++) {
         cout << eval << "^" << i << "=" << (sheval <<= i) << endl;
     }
-
-
 }
 
 /*
@@ -221,12 +215,147 @@ void run_example_vencode() {
 
 }
 
+void run_example_map() {
+    map<int, char> dict;
+    dict.insert(pair<int, char>(0, 'A'));
+    dict.insert(pair<int, char>(1, 'B'));
+    dict.insert(pair<int, char>(2, 'C'));
+
+    cout << "dict[0]: " << dict.at(0) << endl;
+    cout << "dict[1]: " << dict.at(1) << endl;
+    cout << "dict[2]: " << dict.at(2) << endl;
+}
+
+bool valid(string data)  {
+    cout << "not implemented." << endl;
+    return false;
+    // map<char, int> dict;
+    // dict['A'] = 1;
+    // dict['B'] = 2;
+    // dict['C'] = 3;
+    // dict['D'] = 4;
+    // dict['E'] = 5;
+    // dict['F'] = 6;
+    // dict['G'] = 7;
+    // dict['H'] = 8;
+
+    // dict['J'] = 1;
+    // dict['K'] = 2;
+    // dict['L'] = 3;
+    // dict['M'] = 4;
+    // dict['N'] = 5;
+    // dict['P'] = 7;
+    // dict['R'] = 9;
+
+    // dict['S'] = 2;
+    // dict['T'] = 3;
+    // dict['U'] = 4;
+    // dict['V'] = 5;
+    // dict['W'] = 6;
+    // dict['X'] = 7;
+    // dict['Y'] = 8;    
+    // dict['Z'] = 9;
+  
+    
+    // int weight[17] = {8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2};
+    // int sum = 0;
+    // for (int i=0; i<data.length(); i++) {
+    //     int val = decc(data[i]);
+    //     sum = sum + weight[i] * val;
+    // }
+
+    // sum = sum % 11;
+    // char check = data.at(8);
+    // cout << "check: " << check;
+    // cout << " decc(check): " << decc(check);
+    // cout << " sum: " << sum;
+    // cout << endl;
+
+    // if (decc(check) < 10)
+    //     return sum == decc(check);
+    // if (sum == 10 && check == 'X')
+    //     return true;
+    // else if (sum == dict.at(check))
+    //     return true;
+    // else
+    //     return false;
+
+}
+
+void run_example_checksum(string data) {
+    cout << "checksum: " << (valid(data) ? "true" : "false") << endl;
+}
+
+void run_file() {
+    fstream fio;
+    string line;
+
+    fio.open("output");
+    fio.seekg(0, ios::beg);
+    cout << "start of file" << endl;
+    uint32_t counter = 0;
+    size_t len = 0;
+
+    while(fio) {
+        counter++;
+
+        getline(fio, line);
+        len = line.length();
+        cout << "len: " << len << endl;
+
+        if (counter == 10) {
+            break;
+        }        
+
+        if (len >= 17) {
+            Vradix vradix = {0,0,0};
+            int base = 33;
+            string data_x;
+            string data_y;
+            string data_z;
+
+            string buffer_x = line.substr(0,3);
+            string buffer_y = line.substr(3,5);
+            string buffer_z = line.substr(8,9);
+            cout << "bufer_x: " << buffer_x << endl;
+            cout << "bufer_y: " << buffer_y << endl;
+            cout << "bufer_z: " << buffer_z << endl;
+
+
+            vmapencode(buffer_x, &data_x);
+            vradix.wmi = vradenc(data_x, base);
+
+            vmapencode(buffer_y, &data_y);
+            vradix.vds = vradenc(data_y, base); 
+
+            vmapencode(buffer_z, &data_z);
+            vradix.ser = vradenc(data_z, base);  
+        }
+    }
+
+
+
+    fio.close();
+    cout << "end of file." << endl;
+}
+
+void run_example_substr(string data) {
+    cout << "sub[0,3]:" << data.substr(0,3) << endl;
+    cout << "sub[3,5]:" << data.substr(3,5) << endl;
+    cout << "sub[8,9]:" << data.substr(8,9) << endl;
+}
+
 int main() {
+    // run_example_checksum("JTHKD5BH0D2170008");
+    // run_example_map();
     // run_example_exp();
     // return 0;
-    run_example_vencode();
+    
     // run_example_encdec_base10();
-    // run_example_encdec_base33("HACK3D");
+    // run_example_encdec_base33("JTH");
+    // run_example_substr("JTHKD5BH0D2170008");
+    // run_example_vencode();
+    run_file();
 
 
 
