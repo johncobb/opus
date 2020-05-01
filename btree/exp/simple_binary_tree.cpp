@@ -14,6 +14,14 @@ clock_t clock_time;
 clock_t clock_start;
 clock_t clock_end;
 
+uint32_t sanity_level = 0;
+#define SANE_MAX  20
+
+void sanity() {
+    if (sanity_level++ > SANE_MAX)
+        exit(0);
+}
+
 struct Node {
     int data;
     Node* left;
@@ -33,6 +41,7 @@ Node* build_binary_tree(string data);
 
 char encc(int code);
 char decc(int code);
+void load_stack(stack<int> *buffer, string data);
 
 void inorder(Node* root);
 int identical(Node* root1, Node* root2);
@@ -43,6 +52,12 @@ char encc(int code) {
 }
 char decc(int code) {
     return char(code - '0');
+}
+
+void load_stack(stack<int> *buffer, string data) {
+    for (int i = 0; i< data.length(); i++) {
+        buffer->push(data[i]);
+    }    
 }
 
 void inorder(Node* root) {
@@ -82,17 +97,17 @@ int identical(Node* root1, Node* root2) {
     }
 }
 
-Node* build_binary_tree(string data) {
 
-    static int index = 0;
+Node* build_binary_tree(stack<int> *data) {
 
-    if (data.length() == index) {
+    if (data->empty()) {
         return NULL;
     }
 
-    Node* root = new_node(decc(data[index]));
-    index++;
 
+    Node* root = new_node(decc(data->top()));
+
+    data->pop();
     
     root->left = build_binary_tree(data);
     // cout << "left: " << endl;
@@ -108,14 +123,17 @@ void run_build_binary_tree() {
     cout << "run_build_binary_tree " << endl;
 
     string vdata1 = "JTHKD5BH0D2170008";
-    string vdata2 = "JTHKD5BH8D2169687";
+    stack<int> vbuffer1;
+    load_stack(&vbuffer1, vdata1);
 
-    Node* root1 = build_binary_tree(vdata2);
-    Node* root2 = build_binary_tree(vdata1);
+    // string vdata2 = "JTHKD5BH8D2169687";
+
+    Node* root1 = build_binary_tree(&vbuffer1);
+    // Node* root2 = build_binary_tree(vdata2);
 
     inorder(root1);
-    inorder(root2);
-    identical(root1, root2);
+    // inorder(root2);
+    // identical(root1, root2);
     cout << "end of the line." << endl;
 }
 
