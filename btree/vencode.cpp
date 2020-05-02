@@ -5,6 +5,9 @@
 
 using namespace std;
 
+/* references: 
+ * https://www.geeksforgeeks.org/introduction-of-b-tree-2/
+ */
 clock_t clock_time;
 clock_t clock_start;
 clock_t clock_end;
@@ -157,6 +160,27 @@ Node* build_tree(stack<int> *data) {
     // cout << "right: " << endl;
     
     return root;
+}
+
+Node* build_binary_tree(string data) {
+
+    static int index = 0;
+
+    if (data.length() == index) {
+        return NULL;
+    }
+
+    Node* root = new_node(decc(data[index]));
+    index++;
+
+    
+    root->left = build_binary_tree(data);
+    // cout << "left: " << endl;
+    root->right = build_binary_tree(data);
+    // cout << "right: " << endl;
+    
+    return root;
+
 }
 
 /*
@@ -320,7 +344,20 @@ void run_example_buildtree_flagx() {
     cout << endl;
 }
 
-void run_example() {
+void run_build_binary_tree() {
+    
+    cout << "run_build_binary_tree " << endl;
+
+
+    string vdata = "JTHKD5BH0D2170008";
+
+    Node* root = build_binary_tree(vdata);
+
+    inorder(root);
+    cout << "end of the line." << endl;
+}
+
+void run_basic_example() {
 
     /*
      * JTHKD5BH0D2170008
@@ -371,14 +408,15 @@ void run_example() {
  */
 int main() {
 
-    // run_example();
+    // run_basic_example();
+    run_build_binary_tree();
     // run_example_buildtree();
     // run_example_map();
     // run_example_buildtree_flag();
-    run_example_buildtree_flagx();
+    // run_example_buildtree_flagx();
     return 0;
     
-    clock_start = clock();
+    // clock_start = clock();
 
     fstream fio;
     string line;
@@ -408,11 +446,11 @@ int main() {
     cout << "stack depth: " << vdata.size() << endl;
 
     fio.close();
-    clock_end = clock();
+    // clock_end = clock();
 
-double time_taken = double(clock_end - clock_start) / double(CLOCKS_PER_SEC); 
-    cout << "total duration : " << fixed  
-    << time_taken << setprecision(5); 
-    cout << " sec " << endl; 
+// double time_taken = double(clock_end - clock_start) / double(CLOCKS_PER_SEC); 
+//     cout << "total duration : " << fixed;
+//     cout << time_taken << setprecision(5); 
+//     cout << " sec " << endl; 
 
 }
